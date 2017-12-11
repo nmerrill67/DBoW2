@@ -1,0 +1,9 @@
+/home/nate/Libraries/DBoW2/build/CMakeFiles/install.dir
+/home/nate/Libraries/DBoW2/build/CMakeFiles/list_install_components.dir
+/home/nate/Libraries/DBoW2/build/CMakeFiles/rebuild_cache.dir
+/home/nate/Libraries/DBoW2/build/CMakeFiles/edit_cache.dir
+/home/nate/Libraries/DBoW2/build/CMakeFiles/Dependencies.dir
+/home/nate/Libraries/DBoW2/build/CMakeFiles/DBoW2.dir
+/home/nate/Libraries/DBoW2/build/CMakeFiles/demo.dir
+/home/nate/Libraries/DBoW2/build/CMakeFiles/install/local.dir
+/home/nate/Libraries/DBoW2/build/CMakeFiles/install/strip.dir
