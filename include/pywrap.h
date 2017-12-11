@@ -25,26 +25,26 @@ class PyDBoW2
 {
 private:
 
-cv::Ptr<cv::ORB> orb
-
-
+cv::Ptr<cv::ORB> orb;
 OrbVocabulary voc;
 OrbDatabase db; // false = do not use direct index
 
-PyObject* queryResultsToPyTuple(const QueryResults &q) 
+PyObject* queryResultsToPyTuple(const QueryResults &q);
 cv::Mat pyObjToMat(PyObject* source);
 
 void changeStructure(const cv::Mat &plain, vector<cv::Mat> &out);
 
 vector<cv::Mat> getFeatures(PyObject* im);
+vector< vector<cv::Mat> > voc_vec;
 
 public:
 
 PyDBoW2();
 
+void createVocAndDB();
 void addVoc(PyObject* im); // im will be converted to cv::Mat
-void PyObject* getClosestMatch(PyObject* im); // Get the tuple of "index, score" for the matching of the new image 
-}
+PyObject* getClosestMatch(PyObject* im); // Get the tuple of "index, score" for the matching of the new image 
+};
 
 boost::shared_ptr<PyDBoW2> initWrapper();
 

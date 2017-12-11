@@ -86,3 +86,44 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/DBoW2Config.cmake"
 install(FILES "${PROJECT_BINARY_DIR}/DBoW2Config.cmake" 
   DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/cmake/DBoW2/)
 install(DIRECTORY ${DEPENDENCY_INSTALL_DIR}/ DESTINATION ${CMAKE_INSTALL_PREFIX} OPTIONAL)
+
+
+
+#### Python wrapper #################
+find_package( PythonLibs 2.7 REQUIRED)
+
+find_package( Boost COMPONENTS python REQUIRED )
+
+execute_process( COMMAND export CPLUS_INCLUDE_PATH="${PYTHON_INCLUDE_DIRS}" )
+
+include_directories(	
+	
+	${CMAKE_CURRENT_SOURCE_DIR}/include
+	${CMAKE_CURRENT_SOURCE_DIR}/include/DBoW2
+	${PYTHON_INCLUDE_DIRS}
+	${Boost_INCLUDE_DIR}
+)
+
+add_library(dbow2 SHARED
+	${CMAKE_CURRENT_SOURCE_DIR}/src/pywrap.cpp
+)
+
+target_link_libraries(dbow2
+	${OpenCV_LIBS} 
+	${DLib_LIBS}
+	${PROJECT_NAME}
+	${Python_LIBRARIES}
+	${Boost_LIBRARIES}
+)
+
+# don't prepend wrapper library name with lib
+set_target_properties( dbow2 PROPERTIES PREFIX "" )
+
+
+
+
+
+
+
+
+
