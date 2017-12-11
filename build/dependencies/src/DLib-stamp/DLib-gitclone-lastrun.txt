@@ -1,3 +1,0 @@
-repository='http://github.com/dorian3d/DLib'
-module=''
-tag=''
