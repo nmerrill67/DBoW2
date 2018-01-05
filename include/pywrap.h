@@ -35,18 +35,16 @@ cv::Mat pyObjToMat(PyObject* source);
 void changeStructure(const cv::Mat &plain, vector<cv::Mat> &out);
 
 vector<cv::Mat> getFeatures(PyObject* im);
-vector< vector<cv::Mat> > voc_vec;
 
 public:
 
-PyDBoW2();
+PyDBoW2(const std::string &vocab_file);
 
-void createVocAndDB();
-void addVoc(PyObject* im); // im will be converted to cv::Mat
+void addToDB(PyObject* im); // im will be converted to cv::Mat
 PyObject* getClosestMatch(PyObject* im); // Get the tuple of "index, score" for the matching of the new image 
 };
 
-boost::shared_ptr<PyDBoW2> initWrapper();
+boost::shared_ptr<PyDBoW2> initWrapper(const std::string &vocab_file);
 
 
 

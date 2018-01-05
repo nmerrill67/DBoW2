@@ -6,7 +6,7 @@ using namespace DUtils;
 using namespace std;
 
 
-PyDBoW2::PyDBoW2()
+PyDBoW2::PyDBoW2(const std::string &vocab_file)
 {
 	// branching factor and depth levels 
 	const int k = 9;
@@ -15,8 +15,10 @@ PyDBoW2::PyDBoW2()
 	const ScoringType score = L1_NORM;
 
 	voc = OrbVocabulary(k, L, weight, score);
+  	if (!voc.loadFromTextFile(vocab_file))
+		throw std::runtime_error("Could not load ORB Vocab file");
 	orb = cv::ORB::create();
-
+	db = OrbDatabase(voc, false, 0); // false = do not use direct index
 }
 
 // Borrowed from https://stackoverflow.com/questions/22667093/how-to-convert-the-numpy-ndarray-to-a-cvmat-using-python-c-api
@@ -56,21 +58,12 @@ vector<cv::Mat> PyDBoW2::getFeatures(PyObject* im)
 
 }
 
-void PyDBoW2::addVoc(PyObject* im)
+void PyDBoW2::addToDB(PyObject* im)
 {
 
-	vector<cv::Mat> features = getFeatures(im);	
-	voc_vec.push_back(features);
+	db.add(getFeatures(im));	
 }
 
-void PyDBoW2::createVocAndDB()
-{
-	// create vocab and database from the same images as vocab
-	voc.create(voc_vec);
-	db = OrbDatabase(voc, false, 0); // false = do not use direct index
-	for (int i = 0; i < voc_vec.size(); i++)
-		db.add(voc_vec[i]);
-}
 
 PyObject* PyDBoW2::queryResultsToPyTuple(const QueryResults &q) 
 {
@@ -105,9 +98,9 @@ PyObject* PyDBoW2::getClosestMatch(PyObject* im)
 	return queryResultsToPyTuple(q);
 }
 
-boost::shared_ptr<PyDBoW2> initWrapper()
+boost::shared_ptr<PyDBoW2> initWrapper(const std::string &vocab_file)
 {
-	boost::shared_ptr<PyDBoW2> ptr( new PyDBoW2 );
+	boost::shared_ptr<PyDBoW2> ptr( new PyDBoW2(vocab_file) );
 	return ptr;
 }
 
@@ -128,9 +121,8 @@ BOOST_PYTHON_MODULE(dbow2)
 	boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
 	boost::python::class_< PyDBoW2, boost::shared_ptr<PyDBoW2>, boost::noncopyable>("PyDBoW2", boost::python::no_init)
 		.def("__init__", boost::python::make_constructor(&initWrapper))
-		.def("addVoc", &PyDBoW2::addVoc)
+		.def("addToDB", &PyDBoW2::addToDB)
 		.def("getClosestMatch", &PyDBoW2::getClosestMatch)
-		.def("createVocAndDB", &PyDBoW2::createVocAndDB)
 	;
 	
 }
