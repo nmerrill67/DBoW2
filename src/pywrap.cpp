@@ -1,5 +1,5 @@
 #include "pywrap.h"
-
+#include <ctime>
 
 using namespace DBoW2;
 using namespace DUtils;
@@ -14,7 +14,11 @@ PyDBoW2::PyDBoW2(const std::string &vocab_file)
 	const WeightingType weight = TF_IDF;
 	const ScoringType score = L1_NORM;
 
+	std::cout << "Loading ORB Vocabulary ...\n";
+	clock_t start = clock();
 	voc = OrbVocabulary(k, L, weight, score);
+  	voc.loadFromTextFile(vocab_file);
+	std::cout << "Time to load vocab tree = " << (double)(clock()-start)/CLOCKS_PER_SEC << "\n";
   	if (!voc.loadFromTextFile(vocab_file))
 		throw std::runtime_error("Could not load ORB Vocab file");
 	orb = cv::ORB::create();

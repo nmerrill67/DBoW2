@@ -18,7 +18,7 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
   endif()
 elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -std=c++11")
 endif()
 
 set(HDRS
@@ -36,7 +36,7 @@ set(DEPENDENCY_INSTALL_DIR ${DEPENDENCY_DIR}/install)
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-find_package(Boost REQUIRED)
+find_package(Boost COMPONENTS system filesystem python REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
 find_package(DLib QUIET 
@@ -92,12 +92,11 @@ install(DIRECTORY ${DEPENDENCY_INSTALL_DIR}/ DESTINATION ${CMAKE_INSTALL_PREFIX}
 #### Python wrapper #################
 find_package( PythonLibs 2.7 REQUIRED)
 
-find_package( Boost COMPONENTS python REQUIRED )
+#find_package( Boost COMPONENTS python REQUIRED )
 
 execute_process( COMMAND export CPLUS_INCLUDE_PATH="${PYTHON_INCLUDE_DIRS}" )
 
-include_directories(	
-	
+include_directories(		
 	${CMAKE_CURRENT_SOURCE_DIR}/include
 	${CMAKE_CURRENT_SOURCE_DIR}/include/DBoW2
 	${PYTHON_INCLUDE_DIRS}
@@ -119,8 +118,21 @@ target_link_libraries(dbow2
 # don't prepend wrapper library name with lib
 set_target_properties( dbow2 PROPERTIES PREFIX "" )
 
+# Speed Test
 
+add_executable(speed-test speed-test/speed-test.cpp)
+target_link_libraries(speed-test
+	${PROJECT_NAME}
+	${OpenCV_LIBS}
+	${DLib_LIBS}
+	${Boost_LIBRARIES}	
+)
 
+execute_process(
+	 COMMAND tar -xzf ORBvoc.txt.tar.gz
+	 WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/Vocabulary
+)
+file(COPY Vocabulary/ORBvoc.txt DESTINATION ${CMAKE_BINARY_DIR}/)
 
 
 
