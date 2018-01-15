@@ -119,7 +119,7 @@ initialize()
 {
   import_array();
 }
-BOOST_PYTHON_MODULE(dbow2)
+BOOST_PYTHON_MODULE(pydbow2)
 {
 	initialize();
 	boost::python::numeric::array::set_module_and_type("numpy", "ndarray");

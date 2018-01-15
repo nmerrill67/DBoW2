@@ -103,11 +103,11 @@ include_directories(
 	${Boost_INCLUDE_DIR}
 )
 
-add_library(dbow2 SHARED
+add_library(pydbow2 SHARED
 	${CMAKE_CURRENT_SOURCE_DIR}/src/pywrap.cpp
 )
 
-target_link_libraries(dbow2
+target_link_libraries(pydbow2
 	${OpenCV_LIBS} 
 	${DLib_LIBS}
 	${PROJECT_NAME}
@@ -116,7 +116,7 @@ target_link_libraries(dbow2
 )
 
 # don't prepend wrapper library name with lib
-set_target_properties( dbow2 PROPERTIES PREFIX "" )
+set_target_properties( pydbow2 PROPERTIES PREFIX "" )
 
 # Speed Test
 
