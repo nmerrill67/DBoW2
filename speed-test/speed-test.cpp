@@ -41,7 +41,7 @@ int main(int argc, char** argv)
 
 	if (argc < 3)
 	{
-		std::cout << "Usage:\n\tspeed-test <mem dir> <live dir> <(optional) GPU_ID (default is use CPU)> \n";
+		std::cout << "Usage:\n\tspeed-test <mem dir> <live dir> \n";
 		return -1;
 	}
 	boost::filesystem::path mem(argv[1]);

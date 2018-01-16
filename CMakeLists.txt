@@ -128,6 +128,15 @@ target_link_libraries(speed-test
 	${Boost_LIBRARIES}	
 )
 
+
+add_executable(vary-db-size speed-test/vary-db-size.cpp)
+target_link_libraries(vary-db-size
+	${PROJECT_NAME}
+	${OpenCV_LIBS}
+	${DLib_LIBS}
+	${Boost_LIBRARIES}	
+)
+
 execute_process(
 	 COMMAND tar -xzf ORBvoc.txt.tar.gz
 	 WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/Vocabulary
