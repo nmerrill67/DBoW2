@@ -75,49 +75,46 @@ int main(int argc, char** argv)
 	cv::Ptr<cv::ORB> orb = cv::ORB::create();
 	OrbDatabase db(voc, false, 0); // false = do not use direct index
 	vector<cv::Mat> feats;
-
-	std::list<std::string> files_list;
-	std::cout << "\n----------------- Database Creation -------------------------\n";
+	list<vector<cv::Mat>> query_des;
 	
-	// Traverse once to get number of files. Slow, but we have the file names to work with now
-	for (boost::filesystem::directory_iterator itr1(mem); itr1!=end_itr; ++itr1)
-		files_list.push_front(itr1->path().string());
-
-	size_t m = 1, q = 0, n = files_list.size();
-	size_t bins = n / 10; // number of bins to create query times for 
+	// Read live files and calculate descriptors only once
+	for (boost::filesystem::directory_iterator itr2(live); itr2!=end_itr; ++itr2)
+	{
+		im = cv::imread(itr2->path().string(), cv::IMREAD_GRAYSCALE);
+		query_des.push_front(getFeatures(im, orb));
+	}
+	
+	size_t m = 1, q = query_des.size(), n = 0;
 	double query_t = 0.0;
 	std::vector<double> times; // results 
 	std::vector<size_t> db_sizes; // results 
 	QueryResults qr;	
-	for (std::string fl : files_list)
+	for (boost::filesystem::directory_iterator itr1(mem); itr1!=end_itr; ++itr1)
 	{
-		im = cv::imread(fl, cv::IMREAD_GRAYSCALE);
+		n++;
+		im = cv::imread(itr1->path().string(), cv::IMREAD_GRAYSCALE);
 		feats = getFeatures(im, orb);
 		int id = db.add(feats);
 		std::cout << "Added Image " << id << " to database\n\n";
 	
-		if (m%bins==0)
+		if (m%10==0)
 		{
-			for (boost::filesystem::directory_iterator itr2(live); itr2!=end_itr; ++itr2)
+			std::cout << "Timing queries for database size=" << m << "\n";
+			for (vector<cv::Mat> d : query_des)
 			{	
-				std::cout << "loading query image from: " << itr2->path().string() << "\n";
-				im = cv::imread(itr2->path().string(), cv::IMREAD_GRAYSCALE);
-				feats = getFeatures(im, orb);
 				start = clock();
-				db.query(feats, qr); // query(im, false) means return 1 result in q, and don't add im's descriptor to database afterwards
+				db.query(d, qr); // query(im, false) means return 1 result in q, and don't add im's descriptor to database afterwards
 				query_t += ((double)clock()-start)/CLOCKS_PER_SEC * 1000 ; // (ms)
-				q++;
 			}
 			times.push_back(query_t / q);
 			db_sizes.push_back(m);
 			query_t = 0.0;
-			q = 0;
 		}	
 		m++;
 	}
 	
 	std::cout << "\n\n\tResults\n\n";
-	std::cout << "bins = " << bins << "\n";
+	std::cout << "bins = " << n / 10 << "\n";
 	std::cout << "N = " << n << "\n";
 	
 	times.shrink_to_fit();
