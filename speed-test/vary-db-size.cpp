@@ -56,11 +56,22 @@ int main(int argc, char** argv)
 		std::cout << "Usage:\n\tspeed-test <mem dir> <live dir>\n";
 		return -1;
 	}
+	bool rs = false; // Resize images or not
+	if (argc == 4 && strcmp("-r", argv[3]) == 0)
+	{
+		std::cout << "Resizing images to 120x160\n";
+		rs = true;
+	}
+	else if (argc == 4)
+	{
+		throw std::runtime_error("Unrecognized argument: " + std::string(argv[3]));
+	}
 	boost::filesystem::path mem(argv[1]);
 	boost::filesystem::path live(argv[2]);
 	boost::filesystem::directory_iterator end_itr; // NULL
 
 	cv::Mat im;	
+	cv::Size sz(160, 120);
 	// branching factor and depth levels 
 	const int k = 9;
 	const int L = 3;
@@ -81,6 +92,8 @@ int main(int argc, char** argv)
 	for (boost::filesystem::directory_iterator itr2(live); itr2!=end_itr; ++itr2)
 	{
 		im = cv::imread(itr2->path().string(), cv::IMREAD_GRAYSCALE);
+		if (rs)	
+			cv::resize(im, im, sz);
 		query_des.push_front(getFeatures(im, orb));
 	}
 	
@@ -93,6 +106,8 @@ int main(int argc, char** argv)
 	{
 		n++;
 		im = cv::imread(itr1->path().string(), cv::IMREAD_GRAYSCALE);
+		if (rs)	
+			cv::resize(im, im, sz);
 		feats = getFeatures(im, orb);
 		int id = db.add(feats);
 		std::cout << "Added Image " << id << " to database\n\n";
@@ -119,8 +134,9 @@ int main(int argc, char** argv)
 	
 	times.shrink_to_fit();
 	db_sizes.shrink_to_fit();
-
 	std::string f = "vary-db-size-dbow-results.txt";
+	if (rs)
+		f = "vary-db-size-dbow-120x160-results.txt";
 	std::ofstream results_file(f);
 	std::ostream_iterator<size_t> m_it(results_file, " ");
 	std::ostream_iterator<double> t_it(results_file, " ");
