@@ -41,17 +41,28 @@ int main(int argc, char** argv)
 
 	if (argc < 3)
 	{
-		std::cout << "Usage:\n\tspeed-test <mem dir> <live dir> \n";
+		std::cout << "Usage:\n\tspeed-test <mem dir> <live dir> <optional -r>\n";
 		return -1;
+	}
+	bool rs = false; // Resize images or not
+	if (argc == 4 && strcmp("-r", argv[3]) == 0)
+	{
+		std::cout << "Resizing images to 120x160\n";
+		rs = true;
+	}
+	else if (argc == 4)
+	{
+		throw std::runtime_error("Unrecognized argument: " + std::string(argv[3]));
 	}
 	boost::filesystem::path mem(argv[1]);
 	boost::filesystem::path live(argv[2]);
 	boost::filesystem::directory_iterator end_itr; // NULL
 	cv::Mat im;
+	cv::Size sz(160, 120);
 	clock_t start;
 	std::list<double> comp_t_list /* descriptor compute + database add times */, query_t_list /* descriptor compute + database query times */;
 	double dt;
-
+	
 
 	// branching factor and depth levels 
 	const int k = 9;
@@ -73,6 +84,8 @@ int main(int argc, char** argv)
 	{	
 		std::cout << "loading database image from: " << itr1->path().string() << "\n";
 		im = cv::imread(itr1->path().string(), cv::IMREAD_GRAYSCALE);
+		if (rs)	
+			cv::resize(im, im, sz);
 		start = clock();
 		feats = getFeatures(im, orb);
 		int id = db.add(feats);
@@ -90,6 +103,8 @@ int main(int argc, char** argv)
 	{	
 		std::cout << "loading query image from: " << itr2->path().string() << "\n";
 		im = cv::imread(itr2->path().string(), cv::IMREAD_GRAYSCALE);
+		if (rs)	
+			cv::resize(im, im, sz);
 		feats = getFeatures(im, orb);
 		start = clock();
 		db.query(feats, q); // query(im, false) means return 1 result in q, and don't add im's descriptor to database afterwards
