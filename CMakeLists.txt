@@ -36,30 +36,30 @@ set(DEPENDENCY_INSTALL_DIR ${DEPENDENCY_DIR}/install)
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-find_package(Boost COMPONENTS system filesystem python REQUIRED)
+find_package(Boost COMPONENTS system filesystem python numpy REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
-find_package(DLib QUIET 
+find_package(DLib REQUIRED
   PATHS ${DEPENDENCY_INSTALL_DIR})
-if(${DLib_FOUND})
-  message("DLib library found, using it from the system")
-  include_directories(${DLib_INCLUDE_DIRS})
-  add_custom_target(Dependencies)
-else(${DLib_FOUND})
-  message("DLib library not found in the system, it will be downloaded on build")
-  option(DOWNLOAD_DLib_dependency "Download DLib dependency" ON)
-  if(${DOWNLOAD_DLib_dependency})
-    ExternalProject_Add(DLib
-      PREFIX ${DEPENDENCY_DIR}
-      GIT_REPOSITORY http://github.com/dorian3d/DLib
-      GIT_TAG master
-      INSTALL_DIR ${DEPENDENCY_INSTALL_DIR}
-      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>)
-    add_custom_target(Dependencies ${CMAKE_COMMAND} ${CMAKE_SOURCE_DIR} DEPENDS DLib)
-  else()
-    message(SEND_ERROR "Please, activate DOWNLOAD_DLib_dependency option or download manually")
-  endif(${DOWNLOAD_DLib_dependency})
-endif(${DLib_FOUND})
+#if(${DLib_FOUND})
+#message("DLib library found, using it from the system")
+include_directories(${DLib_INCLUDE_DIRS})
+add_custom_target(Dependencies)
+  #else(${DLib_FOUND})
+  #message("DLib library not found in the system, it will be downloaded on build")
+  #option(DOWNLOAD_DLib_dependency "Download DLib dependency" ON)
+  #if(${DOWNLOAD_DLib_dependency})
+  #  ExternalProject_Add(DLib
+  #    PREFIX ${DEPENDENCY_DIR}
+  #    GIT_REPOSITORY http://github.com/dorian3d/DLib
+  #    GIT_TAG master
+  #    INSTALL_DIR ${DEPENDENCY_INSTALL_DIR}
+  #    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>)
+  #  add_custom_target(Dependencies ${CMAKE_COMMAND} ${CMAKE_SOURCE_DIR} DEPENDS DLib)
+  #else()
+  #  message(SEND_ERROR "Please, activate DOWNLOAD_DLib_dependency option or download manually")
+  #endif(${DOWNLOAD_DLib_dependency})
+  #endif(${DLib_FOUND})
 
 if(BUILD_DBoW2)
   add_library(${PROJECT_NAME} SHARED ${SRCS})
