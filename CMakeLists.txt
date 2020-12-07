@@ -12,13 +12,9 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 if(MSVC)
-  if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
-    string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-  else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
-  endif()
-elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -std=c++11")
+  add_compile_options(/W4)
+else()
+  add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
 set(HDRS
@@ -39,38 +35,21 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 find_package(Boost COMPONENTS system filesystem python REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
-find_package(DLib QUIET 
-  PATHS ${DEPENDENCY_INSTALL_DIR})
-if(${DLib_FOUND})
-  message("DLib library found, using it from the system")
-  include_directories(${DLib_INCLUDE_DIRS})
-  add_custom_target(Dependencies)
-else(${DLib_FOUND})
-  message("DLib library not found in the system, it will be downloaded on build")
-  option(DOWNLOAD_DLib_dependency "Download DLib dependency" ON)
-  if(${DOWNLOAD_DLib_dependency})
-    ExternalProject_Add(DLib
-      PREFIX ${DEPENDENCY_DIR}
-      GIT_REPOSITORY http://github.com/dorian3d/DLib
-      GIT_TAG master
-      INSTALL_DIR ${DEPENDENCY_INSTALL_DIR}
-      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>)
-    add_custom_target(Dependencies ${CMAKE_COMMAND} ${CMAKE_SOURCE_DIR} DEPENDS DLib)
-  else()
-    message(SEND_ERROR "Please, activate DOWNLOAD_DLib_dependency option or download manually")
-  endif(${DOWNLOAD_DLib_dependency})
-endif(${DLib_FOUND})
-
 if(BUILD_DBoW2)
-  add_library(${PROJECT_NAME} SHARED ${SRCS})
-  include_directories(include/DBoW2/)
-  add_dependencies(${PROJECT_NAME} Dependencies)
-  target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} ${DLib_LIBS})
+  set(LIB_SHARED "SHARED")
+  if(WIN32)
+    set(LIB_SHARED "STATIC")
+  endif(WIN32)
+  add_library(${PROJECT_NAME} ${LIB_SHARED} ${SRCS})
+  target_include_directories(${PROJECT_NAME} PUBLIC include/DBoW2/ include/)
+  target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+  set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)
 endif(BUILD_DBoW2)
 
 if(BUILD_Demo)
   add_executable(demo demo/demo.cpp)
-  target_link_libraries(demo ${PROJECT_NAME} ${OpenCV_LIBS} ${DLib_LIBS})
+  target_link_libraries(demo ${PROJECT_NAME} ${OpenCV_LIBS})
+  set_target_properties(demo PROPERTIES CXX_STANDARD 11)
   file(COPY demo/images DESTINATION ${CMAKE_BINARY_DIR}/)
 endif(BUILD_Demo)
 
